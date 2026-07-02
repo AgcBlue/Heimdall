@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "../C++Programs"
+		},
+		{
+			"path": "../JavaPrograms"
+		},
+		{
+			"path": "../VerilogPrograms"
+		},
+		{
+			"path": "../WEB/gradina-lui-marcel"
+		},
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "interactive"
+	}
+}
