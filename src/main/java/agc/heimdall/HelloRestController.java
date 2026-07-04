@@ -1,4 +1,4 @@
-package agc.Heimdall;
+package agc.heimdall;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
