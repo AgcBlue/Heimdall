@@ -11,6 +11,7 @@ public class HeimdallApplication
 
 	public static void main(String[] args) 
 	{
+		System.out.println("MERGE");
 		LogIngestion LOGGS = new LogIngestion();
 		LOGGS.printLogInfo();
 
