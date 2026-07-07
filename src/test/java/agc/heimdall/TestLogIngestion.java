@@ -25,7 +25,6 @@ class TestLogIngestion
         assertEquals("abc", map.get("test/test0"));
         assertEquals("def", map.get("test/test0/test1"));
 	}	
-
 }
 
 

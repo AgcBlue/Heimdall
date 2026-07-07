@@ -5,6 +5,8 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author agc
@@ -12,6 +14,7 @@ import java.util.regex.Pattern;
 public class LogIngestion 
 {
     private final static String FILE_PATH = "heimdall.properties";
+    private static final Logger logger = LogManager.getLogger(LogIngestion.class);
     private final static String FILE = "file";
     private final static String CONFIG = "config";
     private Map<String, String> logConfig = new HashMap<>();
@@ -30,7 +33,7 @@ public class LogIngestion
         } 
         catch (IOException e) 
         {
-            throw new RuntimeException("Error at loading properties: ", e);
+            throw new ExceptionInInitializerError(e);
         }
 
         int index = 0;
@@ -79,7 +82,7 @@ public class LogIngestion
             }
             catch(IOException e)
             {
-                System.err.println("Error at reading the file: " + e.getMessage());
+                logger.trace("Error at reading the file: {}" + e.getMessage());
             }
         }
     }
