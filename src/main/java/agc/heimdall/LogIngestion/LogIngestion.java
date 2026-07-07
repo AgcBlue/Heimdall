@@ -6,23 +6,23 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
-
+//@author agc
 public class LogIngestion 
 {
-    private String filePath = "heimdall";
+    private final static String FILE_PATH = "heimdall.properties";
+    private final static String FILE = "file";
+    private final static String CONFIG = "config";
     private Map<String, String> logConfig = new HashMap<>();
-    private int logFileNumber = 0;
-
 
     public LogIngestion() 
     {
         Properties props = new Properties();
 
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("heimdall.properties")) 
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH)) 
         {
             if (input == null) 
             {
-                throw new RuntimeException("heimdall.properties was not found");
+                throw new FileNotFoundException("heimdall.properties was not found");
             }
             props.load(input);
         } 
@@ -31,45 +31,43 @@ public class LogIngestion
             throw new RuntimeException("Error at loading properties: ", e);
         }
 
-        populateMaps(props);
-    }
-
-    private void populateMaps(Properties props)
-    {
         int index = 0;
         while(props.getProperty("file" + index) != null)
         {
-            logConfig.put(props.getProperty("file" + index), props.getProperty("config" + index));
+            logConfig.put(props.getProperty(FILE + index), props.getProperty(CONFIG + index));
             index++;
         }
-
     }
-
-    public void printLogInfo()
-    {
-        for(var log : logConfig.entrySet())
-        {
-            System.out.println(log.getKey() + " + " + log.getValue());
-        }
-    }
-
+    
     private void lineHandler(String line)
-    {
+    {       
         LinkedList<String> parsedLine = new LinkedList<>();
-        StringBuilder build = new StringBuilder();
-        
-        for(int i = 0; i < line.length(); i++)
+        /*
+            StringBuilder build = new StringBuilder();
+
+            for(int i = 0; i < line.length(); i++)
+            {
+                if(line.charAt(i) == ' ')
+                {
+                    parsedLine.add(build.toString());
+                }
+                else
+                {
+                    build.append(line.charAt(i));
+                }
+            }
+            parsedLine.add(build.toString());
+        */
+        String[] splitLine = line.split(" ");
+        for(String s : splitLine)
         {
-            if(line.charAt(i) == ' ')
-            {
-                parsedLine.add(build.toString());
-            }
-            else
-            {
-                build.append(line.charAt(i));
-            }
+            parsedLine.add(s);
         }
-        parsedLine.add(build.toString());
+    }
+
+    public Map<String, String> getLogConfig()
+    {
+        return logConfig;
     }
 
     private void dinamicLineHandler(String line)
