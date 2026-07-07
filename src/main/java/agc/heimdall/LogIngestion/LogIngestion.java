@@ -6,7 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
-//@author agc
+/**
+ * @author agc
+*/
 public class LogIngestion 
 {
     private final static String FILE_PATH = "heimdall.properties";
@@ -38,26 +40,10 @@ public class LogIngestion
             index++;
         }
     }
-    
+
     private void lineHandler(String line)
     {       
         LinkedList<String> parsedLine = new LinkedList<>();
-        /*
-            StringBuilder build = new StringBuilder();
-
-            for(int i = 0; i < line.length(); i++)
-            {
-                if(line.charAt(i) == ' ')
-                {
-                    parsedLine.add(build.toString());
-                }
-                else
-                {
-                    build.append(line.charAt(i));
-                }
-            }
-            parsedLine.add(build.toString());
-        */
         String[] splitLine = line.split(" ");
         for(String s : splitLine)
         {
@@ -70,12 +56,11 @@ public class LogIngestion
         return logConfig;
     }
 
-    private void dinamicLineHandler(String line)
+    private void dynamicLineHandler(String line)
     {
         List<Pattern> datePatterns = List.of
         (
             Pattern.compile("\\d{2,4}(-?/?){1}\\d{2}-?/\\d{2,4}T?t? ?\\d{2}:\\d{2}:\\d{2} ?Z?z?A?P?M*)")
-
         );
     }
 
@@ -91,13 +76,11 @@ public class LogIngestion
                 {
                     lineHandler(line);  
                 }
-
             }
             catch(IOException e)
             {
                 System.err.println("Error at reading the file: " + e.getMessage());
             }
         }
-        
     }
 }

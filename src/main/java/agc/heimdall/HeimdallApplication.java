@@ -13,9 +13,5 @@ public class HeimdallApplication
 	{
 		System.out.println("MERGE");
 		LogIngestion LOGGS = new LogIngestion();
-		
-		//SpringApplication.run(HeimdallApplication.class, args);
-		//System.out.println("Hello World!");
 	}
-
 }
