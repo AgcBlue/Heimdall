@@ -19,22 +19,13 @@ public class LogIngestion
     private final static String CONFIG = "config";
     private Map<String, String> logConfig = new HashMap<>();
 
-    public LogIngestion() 
+    public LogIngestion() throws IOException 
     {
         Properties props = new Properties();
 
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH)) 
-        {
-            if (input == null) 
-            {
-                throw new FileNotFoundException("heimdall.properties was not found");
-            }
-            props.load(input);
-        } 
-        catch (IOException e) 
-        {
-            throw new ExceptionInInitializerError(e);
-        }
+        InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH);
+        props.load(input);
+        
 
         int index = 0;
         while(props.getProperty("file" + index) != null)

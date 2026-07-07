@@ -8,7 +8,7 @@ import agc.heimdall.LogIngestion.LogIngestion;
 @SpringBootApplication
 public class HeimdallApplication 
 {
-	public static void main(String[] args) 
+	public static void main(String[] args) throws Exception
 	{
 		System.out.println("MERGE");
 		LogIngestion LOGGS = new LogIngestion();

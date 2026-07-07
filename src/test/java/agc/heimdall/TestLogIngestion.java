@@ -15,7 +15,7 @@ import agc.heimdall.LogIngestion.*;
 class TestLogIngestion
 {
 	@Test
-	public void mapTest(TestReporter reporter) 
+	public void mapTest(TestReporter reporter) throws Exception
     {
 		LogIngestion loggs = new LogIngestion();
         Map<String, String> map = loggs.getLogConfig();
