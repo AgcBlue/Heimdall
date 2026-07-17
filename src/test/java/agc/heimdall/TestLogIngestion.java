@@ -10,6 +10,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import agc.heimdall.LogIngestion.*;
 import agc.heimdall.properties.*;
@@ -17,10 +18,13 @@ import agc.heimdall.properties.*;
 @SpringBootTest
 class TestLogIngestion
 {
+
+    @Autowired
+    private LogIngestion loggs;
+
 	@Test
 	public void mapTest(TestReporter reporter) throws Exception
     {
-		LogIngestion loggs = new LogIngestion();
         List<LogConfig> logConfig = loggs.getLogConfig();
 
         assertEquals("test/test0", logConfig.get(0).getFile());
@@ -32,6 +36,12 @@ class TestLogIngestion
         assertEquals("hea", logConfig.get(0).getHeader());
         assertEquals("der", logConfig.get(1).getHeader());
 	}	
+
+    @Test
+    public void dataBaseTest(TestReporter reporter) throws Exception
+    {
+        
+    }
 }
 
 

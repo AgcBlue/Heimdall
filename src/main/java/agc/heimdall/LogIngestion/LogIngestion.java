@@ -8,12 +8,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
+
 import agc.heimdall.properties.*;
+import agc.heimdall.database.log_events.LogEvent;
+import agc.heimdall.database.log_events.LogEventRepository;
+import agc.heimdall.database.LogIngestionService;
+import java.time.LocalDateTime;
 
 /**
  * @author agc
-*/
-public class LogIngestion 
+*/  
+
+@Component
+public class LogIngestion
 {
     private static final Logger logger = LogManager.getLogger(LogIngestion.class);
 
@@ -22,6 +30,8 @@ public class LogIngestion
     private final static String REGEX = "regex";
     private final static String HEADER = "header";
 
+    private final LogIngestionService logIngestionService;
+
     List<LogConfig> logConfig = new ArrayList<>();
 
     public List<LogConfig> getLogConfig()
@@ -29,12 +39,16 @@ public class LogIngestion
         return logConfig;
     }
 
-    public LogIngestion() throws IOException 
+    public LogIngestion(LogIngestionService logIngestionService) throws IOException 
     {
+        this.logIngestionService = logIngestionService;
+
         Properties props = new Properties();
 
         InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH);
         props.load(input);
+
+        
 
         int index = 0;
         while(props.getProperty(FILE + index) != null)
@@ -56,20 +70,57 @@ public class LogIngestion
         }
     }
 
-    private void dynamicLineHandler(String line, String regex, String header)
+    private LogEvent dynamicLineHandler(String line, LogConfig log)
     {
+        String regex = log.getRegex();
+        String header = log.getHeader();
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(line);
-        matcher.matches();
 
-        for (int i = 1; i <= matcher.groupCount(); i++)
-        {
-            System.out.println(matcher.group(i));
+        if(matcher.matches() == true)
+        {   
+            if(matcher.groupCount() != log.headerCount())
+            {
+                logger.trace("Log entry does not respect the header: " + matcher.groupCount() + " != " + log.headerCount());
+                return null;
+            }
+            
+            List<String> parsedLine = new LinkedList<>();
+            String[] splitLine = header.split(" ");
+
+            for (int i = 1; i <= matcher.groupCount(); i++)
+            {
+                parsedLine.add(matcher.group(i));
+            }
+
+
+            LogEvent logEvent = new LogEvent();
+
+            int i = 1;
+            for(var s : splitLine)
+            {
+                switch (s) 
+                {
+                    case "date" -> logEvent.setEventTime(LocalDateTime.parse(matcher.group(i)));
+                    case "ip" -> logEvent.setIp(matcher.group(i));
+                    case "username" -> logEvent.setUsername(matcher.group(i));
+                    case "action" -> logEvent.setAction(matcher.group(i));
+                    case "status" -> logEvent.setStatus(matcher.group(i));
+                    default -> logger.debug("Unknown token in header: {}", parsedLine.get(i));
+                }
+                i++;
+            }
+
+            return logEvent;
         }
-        
+        else
+        {
+            logger.trace("Invalid log entry: " + line);
+            return null;
+        }
     }
 
-    public void readLog()
+    public void readLog(LogHandler handler)
     {
         for(var log : logConfig)
         {
@@ -78,7 +129,8 @@ public class LogIngestion
                 String line;
                 while((line = reader.readLine()) != null)
                 {
-                    dynamicLineHandler(line, log.getRegex(), log.getHeader());  
+                    LogEvent event = dynamicLineHandler(line, log);
+                    handler.handle(event);
                 }
             }
             catch(IOException e)
