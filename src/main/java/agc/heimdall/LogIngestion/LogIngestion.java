@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import agc.heimdall.properties.*;
@@ -30,7 +31,8 @@ public class LogIngestion
     private final static String REGEX = "regex";
     private final static String HEADER = "header";
 
-    private final LogIngestionService logIngestionService;
+    @Autowired
+    private LogIngestionService logIngestionService;
 
     List<LogConfig> logConfig = new ArrayList<>();
 

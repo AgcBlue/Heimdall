@@ -26,7 +26,6 @@ class TestLogIngestion
     @Autowired
     private LogIngestion loggs;
 
-
     @Autowired
     LogIngestion log;
 

@@ -1,4 +1,4 @@
-package agc.heimdall.webPages;
+package agc.heimdall.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
