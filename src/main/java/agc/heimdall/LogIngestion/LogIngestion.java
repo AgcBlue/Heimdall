@@ -44,11 +44,8 @@ public class LogIngestion
         this.logIngestionService = logIngestionService;
 
         Properties props = new Properties();
-
         InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH);
         props.load(input);
-
-        
 
         int index = 0;
         while(props.getProperty(FILE + index) != null)
@@ -60,6 +57,10 @@ public class LogIngestion
         System.out.println(index);
     }
 
+    /*
+
+    Unused code left from o previous task - in review to see if needed
+
     private void lineHandler(String line)
     {       
         LinkedList<String> parsedLine = new LinkedList<>();
@@ -69,6 +70,7 @@ public class LogIngestion
             parsedLine.add(s);
         }
     }
+    */
 
     private LogEvent dynamicLineHandler(String line, LogConfig log)
     {
@@ -77,47 +79,41 @@ public class LogIngestion
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(line);
 
-        if(matcher.matches() == true)
-        {   
-            if(matcher.groupCount() != log.headerCount())
-            {
-                logger.trace("Log entry does not respect the header: " + matcher.groupCount() + " != " + log.headerCount());
-                return null;
-            }
-            
-            List<String> parsedLine = new LinkedList<>();
-            String[] splitLine = header.split(" ");
-
-            for (int i = 1; i <= matcher.groupCount(); i++)
-            {
-                parsedLine.add(matcher.group(i));
-            }
-
-
-            LogEvent logEvent = new LogEvent();
-
-            int i = 1;
-            for(var s : splitLine)
-            {
-                switch (s) 
-                {
-                    case "date" -> logEvent.setEventTime(LocalDateTime.parse(matcher.group(i)));
-                    case "ip" -> logEvent.setIp(matcher.group(i));
-                    case "username" -> logEvent.setUsername(matcher.group(i));
-                    case "action" -> logEvent.setAction(matcher.group(i));
-                    case "status" -> logEvent.setStatus(matcher.group(i));
-                    default -> logger.debug("Unknown token in header: {}", parsedLine.get(i));
-                }
-                i++;
-            }
-
-            return logEvent;
-        }
-        else
+        if(matcher.matches() != true)
         {
             logger.trace("Invalid log entry: " + line);
             return null;
+        } 
+
+        if(matcher.groupCount() != log.headerCount())
+        {
+            logger.trace("Log entry does not respect the header: " + matcher.groupCount() + " != " + log.headerCount());
+            return null;
         }
+        List<String> parsedLine = new LinkedList<>();
+        String[] splitLine = header.split(" ");
+
+        for (int i = 1; i <= matcher.groupCount(); i++)
+        {
+            parsedLine.add(matcher.group(i));
+        }
+
+        LogEvent logEvent = new LogEvent();
+        int i = 1;
+        for(var s : splitLine)
+        {
+            switch (s) 
+            {
+                case "date" -> logEvent.setEventTime(LocalDateTime.parse(matcher.group(i)));
+                case "ip" -> logEvent.setIp(matcher.group(i));
+                case "username" -> logEvent.setUsername(matcher.group(i));
+                case "action" -> logEvent.setAction(matcher.group(i));
+                case "status" -> logEvent.setStatus(matcher.group(i));
+                default -> logger.debug("Unknown token in header: {}", parsedLine.get(i));
+            }
+            i++;
+        }
+        return logEvent;
     }
 
     public void readLog(LogHandler handler)

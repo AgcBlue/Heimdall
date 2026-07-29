@@ -12,7 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestReporter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.bind.annotation.GetMapping;
+
 import agc.heimdall.LogIngestion.*;
+import agc.heimdall.database.LogIngestionService;
+import agc.heimdall.database.log_events.LogEvent;
 import agc.heimdall.properties.*;
 
 @SpringBootTest
@@ -22,25 +26,39 @@ class TestLogIngestion
     @Autowired
     private LogIngestion loggs;
 
+
+    @Autowired
+    LogIngestion log;
+
+    @Autowired
+    LogIngestionService logService;
+
 	@Test
 	public void mapTest(TestReporter reporter) throws Exception
     {
         List<LogConfig> logConfig = loggs.getLogConfig();
 
-        assertEquals("test/test0", logConfig.get(0).getFile());
-        assertEquals("test/test0/test1", logConfig.get(1).getFile());
+        assertEquals("/home/agc/Documents/test_log.log", logConfig.get(0).getFile());
 
-        assertEquals("abc", logConfig.get(0).getRegex());
-        assertEquals("def", logConfig.get(1).getRegex());
+        assertEquals("^(\\S+)\\s+(\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3})\\s+(\\S+)\\s+(\\S+)\\s+(\\S+)$", logConfig.get(0).getRegex());
 
-        assertEquals("hea", logConfig.get(0).getHeader());
-        assertEquals("der", logConfig.get(1).getHeader());
+        assertEquals("date ip username action status", logConfig.get(0).getHeader());
 	}	
 
     @Test
     public void dataBaseTest(TestReporter reporter) throws Exception
     {
-        
+        log.readLog(new LogHandler() 
+        {
+            public void handle(LogEvent logEvent)
+            {
+                logService.saveLog(logEvent);
+                assertEquals("192.168.1.10", logEvent.getIp());
+                assertEquals("admin", logEvent.getUsername());
+                assertEquals("LOGIN_SUCCESS", logEvent.getAction());
+                assertEquals("OK", logEvent.getStatus());
+            }
+        });
     }
 }
 

@@ -2,7 +2,7 @@ package agc.heimdall.LogIngestion;
 
 import agc.heimdall.database.log_events.LogEvent;
 
-public interface LogHandler 
+public interface LogHandler
 {
-    public void handle(LogEvent event);
+    default void handle(LogEvent event){};
 }
