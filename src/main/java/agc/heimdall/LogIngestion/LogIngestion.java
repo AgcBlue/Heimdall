@@ -4,36 +4,64 @@ import java.beans.ConstructorProperties;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import agc.heimdall.properties.*;
+import agc.heimdall.database.log_events.LogEvent;
+import agc.heimdall.database.log_events.LogEventRepository;
+import agc.heimdall.database.LogIngestionService;
+import java.time.LocalDateTime;
 
 /**
  * @author agc
-*/
-public class LogIngestion 
+*/  
+
+@Component
+public class LogIngestion
 {
-    private final static String FILE_PATH = "heimdall.properties";
     private static final Logger logger = LogManager.getLogger(LogIngestion.class);
+
+    private final static String FILE_PATH = "heimdall.properties";
     private final static String FILE = "file";
-    private final static String CONFIG = "config";
-    private Map<String, String> logConfig = new HashMap<>();
+    private final static String REGEX = "regex";
+    private final static String HEADER = "header";
 
-    public LogIngestion() throws IOException 
+    @Autowired
+    private LogIngestionService logIngestionService;
+
+    List<LogConfig> logConfig = new ArrayList<>();
+
+    public List<LogConfig> getLogConfig()
     {
-        Properties props = new Properties();
+        return logConfig;
+    }
 
+    public LogIngestion(LogIngestionService logIngestionService) throws IOException 
+    {
+        this.logIngestionService = logIngestionService;
+
+        Properties props = new Properties();
         InputStream input = getClass().getClassLoader().getResourceAsStream(FILE_PATH);
         props.load(input);
-        
 
         int index = 0;
-        while(props.getProperty("file" + index) != null)
+        while(props.getProperty(FILE + index) != null)
         {
-            logConfig.put(props.getProperty(FILE + index), props.getProperty(CONFIG + index));
+            LogConfig temp = new LogConfig(props.getProperty(FILE + index), props.getProperty(REGEX + index), props.getProperty(HEADER + index));
+            logConfig.add(temp);
             index++;
         }
+        System.out.println(index);
     }
+
+    /*
+
+    Unused code left from o previous task - in review to see if needed
 
     private void lineHandler(String line)
     {       
@@ -44,31 +72,63 @@ public class LogIngestion
             parsedLine.add(s);
         }
     }
+    */
 
-    public Map<String, String> getLogConfig()
+    private LogEvent dynamicLineHandler(String line, LogConfig log)
     {
-        return logConfig;
-    }
+        String regex = log.getRegex();
+        String header = log.getHeader();
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(line);
 
-    private void dynamicLineHandler(String line)
-    {
-        List<Pattern> datePatterns = List.of
-        (
-            Pattern.compile("\\d{2,4}(-?/?){1}\\d{2}-?/\\d{2,4}T?t? ?\\d{2}:\\d{2}:\\d{2} ?Z?z?A?P?M*)")
-        );
-    }
-
-    public void readLog()
-    {
-        for(var log : logConfig.entrySet())
+        if(matcher.matches() != true)
         {
-            try(BufferedReader reader = new BufferedReader(new FileReader(log.getValue())))
+            logger.trace("Invalid log entry: " + line);
+            return null;
+        } 
+
+        if(matcher.groupCount() != log.headerCount())
+        {
+            logger.trace("Log entry does not respect the header: " + matcher.groupCount() + " != " + log.headerCount());
+            return null;
+        }
+        List<String> parsedLine = new LinkedList<>();
+        String[] splitLine = header.split(" ");
+
+        for (int i = 1; i <= matcher.groupCount(); i++)
+        {
+            parsedLine.add(matcher.group(i));
+        }
+
+        LogEvent logEvent = new LogEvent();
+        int i = 1;
+        for(var s : splitLine)
+        {
+            switch (s) 
+            {
+                case "date" -> logEvent.setEventTime(LocalDateTime.parse(matcher.group(i)));
+                case "ip" -> logEvent.setIp(matcher.group(i));
+                case "username" -> logEvent.setUsername(matcher.group(i));
+                case "action" -> logEvent.setAction(matcher.group(i));
+                case "status" -> logEvent.setStatus(matcher.group(i));
+                default -> logger.debug("Unknown token in header: {}", parsedLine.get(i));
+            }
+            i++;
+        }
+        return logEvent;
+    }
+
+    public void readLog(LogHandler handler)
+    {
+        for(var log : logConfig)
+        {
+            try(BufferedReader reader = new BufferedReader(new FileReader(log.getFile())))
             {
                 String line;
-
                 while((line = reader.readLine()) != null)
                 {
-                    lineHandler(line);  
+                    LogEvent event = dynamicLineHandler(line, log);
+                    handler.handle(event);
                 }
             }
             catch(IOException e)
