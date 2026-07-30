@@ -14,9 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import agc.heimdall.LogIngestion.*;
 import agc.heimdall.database.LogIngestionService;
-import agc.heimdall.database.log_events.LogEvent;
+import agc.heimdall.database.beans.LogEvent;
+import agc.heimdall.logingestion.LogHandler;
+import agc.heimdall.logingestion.LogIngestion;
 import agc.heimdall.properties.*;
 
 @SpringBootTest

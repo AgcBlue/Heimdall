@@ -5,12 +5,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import agc.heimdall.LogIngestion.LogHandler;
-import agc.heimdall.LogIngestion.LogIngestion;
-import agc.heimdall.database.log_events.LogEventRepository;
+import agc.heimdall.logingestion.LogHandler;
+import agc.heimdall.logingestion.LogIngestion;
+import agc.heimdall.database.repos.LogEventRepository;
 
 import agc.heimdall.database.LogIngestionService;
-import agc.heimdall.database.log_events.LogEvent;
+import agc.heimdall.database.beans.LogEvent;
 
 @SpringBootApplication
 public class HeimdallApplication 

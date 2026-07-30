@@ -4,11 +4,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
-import agc.heimdall.LogIngestion.LogIngestion;
+import agc.heimdall.logingestion.LogIngestion;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import agc.heimdall.database.log_events.LogEvent;
-import agc.heimdall.database.log_events.LogEventRepository;
+import agc.heimdall.database.beans.LogEvent;
+import agc.heimdall.database.repos.LogEventRepository;
 
 @Service
 public class LogIngestionService 

@@ -1,6 +1,6 @@
 package agc.heimdall.LogIngestion;
 
-interface DetectionRule
+public class LogErrorDetection
 {
     
 }

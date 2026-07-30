@@ -4,10 +4,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import agc.heimdall.LogIngestion.LogHandler;
-import agc.heimdall.LogIngestion.LogIngestion;
+import agc.heimdall.logingestion.LogHandler;
+import agc.heimdall.logingestion.LogIngestion;
 import agc.heimdall.database.LogIngestionService;
-import agc.heimdall.database.log_events.LogEvent;
+import agc.heimdall.database.beans.LogEvent;
 
 import org.springframework.ui.Model;
 
